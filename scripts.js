@@ -77,10 +77,12 @@
 
 let TicTacToeGame = (function () {
   //private dom selectors
+  let getRemainingSpots = ()=>{return remainingSpots}
   let gameboard = document.querySelector("#gameboard");
   let info = document.querySelector("#info");
   //private variables
-  let currentPlayer
+  let currentPlayer;
+  let remainingSpots = 9;
   let startCells = [];
   const winningCombinations = [
     [0, 1, 2], // Top row
@@ -108,6 +110,7 @@ let TicTacToeGame = (function () {
         cellElement.id = index;
         cellElement.addEventListener("click", addGo);
         gameboard.appendChild(cellElement);
+        
       });
   }
   const addGo = (e) =>{
@@ -117,52 +120,108 @@ let TicTacToeGame = (function () {
     e.target.append(goDisplay);
     currentPlayer.marker = currentPlayer.marker === "circle" ? "cross" : "circle";
     e.target.removeEventListener("click", addGo);
+    remainingSpots--
     checkScore();
-    
   }
-  let checkScore = function () {
-    let allSquares = document.querySelectorAll(".square");
-    winningCombinations.forEach((array) => {
-      let circleWins = array.every((cell) =>
-        allSquares[cell].firstChild?.classList.contains("circle")
-      );
-      if (circleWins) {
-        console.log("circle wins");
-        info.textContent = "CIRCLE WINS!";
-        allSquares.forEach((square) =>
-          square.replaceWith(square.cloneNode(true))
-        );
+  // let checkScore = function () {
+  //   let allSquares = document.querySelectorAll(".square");
+  //   winningCombinations.forEach((array) => {
+  //     let circleWins = array.every((cell) =>
+  //       allSquares[cell].firstChild?.classList.contains("circle")
+  //     );
+  //     if (circleWins) {
+  //       console.log("circle wins");
+  //       info.textContent = "CIRCLE WINS!";
+  //       allSquares.forEach((square) =>
+  //         square.replaceWith(square.cloneNode(true))
+  //       );
         
-      }
-    });
-    winningCombinations.forEach((array) => {
-      let crossWins = array.every((cell) =>
-        allSquares[cell].firstChild?.classList.contains("cross")
-      );
-      if (crossWins) {
-        console.log("cross wins");
-        info.textContent = "cross WINS!";
-        allSquares.forEach((square) =>
-          square.replaceWith(square.cloneNode(true))
-        );
+  //     }
+  //   });
+  //   winningCombinations.forEach((array) => {
+  //     let crossWins = array.every((cell) =>
+  //       allSquares[cell].firstChild?.classList.contains("cross")
+  //     );
+  //     if (crossWins) {
+  //       console.log("cross wins");
+  //       info.textContent = "cross WINS!";
+  //       allSquares.forEach((square) =>
+  //         square.replaceWith(square.cloneNode(true))
+  //       );
         
-      }
-    });
+  //     }
+  //   });
    
-  };
+  // };
+  // Check for a win condition or a tie
+const checkScore = () => {
+  let allSquares = document.querySelectorAll('.square');
+  let circleWins = false;
+  let crossWins = false;
+
+  // Check for winning combinations
+  winningCombinations.forEach(array => {
+    if (array.every(cell => allSquares[cell].firstChild?.classList.contains("circle"))) {
+      circleWins = true;
+    }
+    if (array.every(cell => allSquares[cell].firstChild?.classList.contains("cross"))) {
+      crossWins = true;
+    }
+  });
+
+  if (circleWins) {
+    console.log("circle wins");
+    info.textContent = "CIRCLE WINS!";
+    info.style.display  = "block"
+    allSquares.forEach(square => square.replaceWith(square.cloneNode(true)));
+  } else if (crossWins) {
+    console.log("cross wins");
+    info.textContent = "CROSS WINS!";
+    info.style.display  = "block"
+
+    allSquares.forEach(square => square.replaceWith(square.cloneNode(true)));
+  } else if (remainingSpots === 0){
+    console.log("It's a draw!");
+    info.style.display  = "block"
+    info.textContent = "It's a draw!";
+  }
+};
+const restartGame = () => {
+  // Clear the gameboard
+  gameboard.innerHTML = '';
+
+  // Reset the startCells array
+  startCells = [];
+
+  // Reset remainingSpots
+  remainingSpots = 9;
+
+  // Recreate the gameboard
+  initializeBoard();
+  createBoard();
+  
+  info.display.style = 'none'
+  // Reset the currentPlayer
+  currentPlayer = CreatePlayer('p1', 'cross');
+
+  // Clear the info message
+  info.textContent = '';
+};
 
   let startGame = ()=>{
     
     initializeBoard()
     createBoard()
     currentPlayer  = CreatePlayer('p1', "cross")
-
+    const restartButton = document.querySelector('#restart');
+    restartButton.addEventListener('click', restartGame);
   }
   let CreatePlayer = (name, marker)=>{
     return {name, marker}
     }
   return{
-    startGame
+    startGame,
+    getRemainingSpots
   }
 })();
 
